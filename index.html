@@ -1,60 +1,22 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audio Test — अंजली</title>
-
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #fff3ea;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    button {
-      padding: 16px 22px;
-      font-size: 16px;
-      border-radius: 12px;
-      border: none;
-      background: #8b2d2d;
-      color: #fff;
-      cursor: pointer;
-    }
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audio Test</title>
 </head>
-
 <body>
 
-<button id="speakBtn">🔊 बोल कर दिखाओ</button>
+<button id="btn" style="font-size:20px;padding:20px;">
+🔊 Tap to Speak
+</button>
 
 <script>
-/* ===============================
-   GUARANTEED AUDIO UNLOCK + TTS
-   =============================== */
-
-const btn = document.getElementById("speakBtn");
-
-btn.addEventListener("click", function () {
-
-  // 🔓 HARD AUDIO UNLOCK (CRITICAL)
-  const unlock = new SpeechSynthesisUtterance(" ");
-  unlock.volume = 0;
-  window.speechSynthesis.speak(unlock);
-
-  // 🔊 ACTUAL VOICE
-  const u = new SpeechSynthesisUtterance(
-    "अगर आप यह सुन पा रहे हैं, तो आवाज़ बिल्कुल सही काम कर रही है।"
-  );
+document.getElementById("btn").onclick = () => {
+  const u = new SpeechSynthesisUtterance("नमस्ते, आवाज़ का परीक्षण सफल है");
   u.lang = "hi-IN";
-  u.rate = 0.9;
-  u.pitch = 1.1;
-  u.volume = 1;
-
+  window.speechSynthesis.cancel();
   window.speechSynthesis.speak(u);
-});
+};
 </script>
 
 </body>
