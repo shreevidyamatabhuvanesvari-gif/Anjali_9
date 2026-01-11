@@ -1,23 +1,261 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Audio Test</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>अंजली</title>
+
+  <style>
+    :root{
+      --bg1:#fff3ea;
+      --bg2:#ffe1cf;
+      --accent:#8b2d2d;
+      --soft:#b35c5c;
+      --card:#ffffff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Devanagari", Arial, sans-serif;
+      background: linear-gradient(135deg,var(--bg1),var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .card{
+      width:92%;
+      max-width:420px;
+      background:var(--card);
+      border-radius:22px;
+      padding:22px 18px 24px;
+      box-shadow:0 14px 30px rgba(0,0,0,.12);
+      text-align:center;
+    }
+    .avatar{
+      width:96px;
+      height:96px;
+      margin:6px auto 12px;
+      border-radius:50%;
+      overflow:hidden;
+      border:3px solid #f0c4c4;
+      box-shadow:0 6px 14px rgba(0,0,0,.15);
+    }
+    .avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .title{
+      font-size:26px;
+      color:var(--accent);
+      margin:6px 0 4px;
+    }
+    .subtitle{
+      font-size:14px;
+      color:#555;
+      margin-bottom:14px;
+    }
+    .status{
+      background:#fff7f4;
+      border:1px solid #f3d4c7;
+      border-radius:14px;
+      padding:10px 12px;
+      font-size:13px;
+      color:#6b2c2c;
+      margin:10px 0 14px;
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+    .btn{
+      border:none;
+      border-radius:16px;
+      padding:12px 16px;
+      font-size:14px;
+      cursor:pointer;
+      background:linear-gradient(180deg,#c96a6a,#a13f3f);
+      color:#fff;
+    }
+    .btn.secondary{
+      background:#fff;
+      color:var(--soft);
+      border:1px dashed #e6b2b2;
+    }
+    .footer{
+      margin-top:14px;
+      font-size:11px;
+      color:#777;
+    }
+  </style>
 </head>
+
 <body>
+<main class="card">
 
-<button id="btn" style="font-size:20px;padding:20px;">
-🔊 Tap to Speak
-</button>
+  <div class="avatar">
+    <img src="avatar.png" alt="Anjali Avatar">
+  </div>
 
+  <div class="title">अंजली</div>
+  <div class="subtitle">स्नेहपूर्ण • समझदार • मर्यादित</div>
+
+  <div class="status" id="appStatus">अंजली तैयार है</div>
+
+  <div class="actions">
+    <button class="btn" id="startBtn">शुरू करें</button>
+    <button class="btn secondary" id="adminBtn">Admin Panel</button>
+  </div>
+
+  <div class="footer">Foundation • Stage-1</div>
+</main>
+
+<!-- ===== CORE SYSTEM ===== -->
+<script src="core/AnjaliCore.js"></script>
+
+<!-- ===== LEARNING ===== -->
+<script src="learning/KnowledgeBase.js"></script>
+<script src="core/AnswerEngine.js"></script>
+<script src="learning/ExperienceMemory.js"></script>
+
+<!-- ===== BRIDGE / CONTROL ===== -->
+<script src="core/LearningBridge.js"></script>
+<script src="core/AdminControl.js"></script>
+
+<!-- ===== VOICE ===== -->
+<script src="voice/tts.js"></script>
+<script src="voice/stt.js"></script>
+
+<!-- ================= SAFE CONVERSATION LOOP ================= -->
 <script>
-document.getElementById("btn").onclick = () => {
-  const u = new SpeechSynthesisUtterance("नमस्ते, आवाज़ का परीक्षण सफल है");
-  u.lang = "hi-IN";
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(u);
+let audioUnlocked = false;
+let conversationActive = false;
+
+function startConversation() {
+  const status = document.getElementById("appStatus");
+
+  if (window.TTS && !audioUnlocked) {
+    TTS.init();
+    audioUnlocked = true;
+  }
+
+  conversationActive = true;
+  status.textContent = "अंजली बोल रही है…";
+
+  TTS.speak("मैं सुन रही हूँ। आप प्रश्न बोल सकते हैं।");
+
+  waitForSpeechEnd(() => {
+    if (window.STT && conversationActive) {
+      status.textContent = "मैं सुन रही हूँ…";
+      STT.start();
+    }
+  });
+}
+
+function waitForSpeechEnd(cb) {
+  const i = setInterval(() => {
+    if (!speechSynthesis.speaking) {
+      clearInterval(i);
+      cb();
+    }
+  }, 120);
+}
+
+// STT → Answer → फिर सुनना
+window.onAnjaliAnswered = function () {
+  if (!conversationActive) return;
+  setTimeout(() => {
+    const status = document.getElementById("appStatus");
+    status.textContent = "मैं सुन रही हूँ…";
+    if (window.STT) STT.start();
+  }, 600);
+};
+
+// ✅ ONLY ONE BUTTON HANDLER
+document.getElementById("startBtn").onclick = startConversation;
+
+// Admin
+document.getElementById("adminBtn").onclick = () => {
+  window.location.href = "admin.html";
 };
 </script>
 
+<!-- ================= SAFE CONVERSATION LOOP (FINAL) ================= -->
+<script>
+window.conversationActive = false;
+let audioUnlocked = false;
+let remindTimer = null;
+
+function startConversation() {
+  const status = document.getElementById("appStatus");
+
+  // 🔓 Audio unlock (एक बार)
+  if (window.TTS && !audioUnlocked) {
+    TTS.init();
+    audioUnlocked = true;
+  }
+
+  window.conversationActive = true;
+  status.textContent = "अंजली बोल रही है…";
+
+  // 🔊 अंजली बोले
+  if (window.TTS) {
+    TTS.speak("मैं सुन रही हूँ। आप मुझसे बात कर सकते हैं।");
+  }
+
+  // ⏳ बोलना खत्म होते ही सुनना
+  waitForSpeechEnd(() => {
+    if (window.STT && window.conversationActive) {
+      status.textContent = "मैं सुन रही हूँ…";
+      STT.start();
+    }
+  });
+
+  // 🔁 याद दिलाने वाला soft loop (30 सेकंड)
+  clearInterval(remindTimer);
+  remindTimer = setInterval(() => {
+    if (
+      window.conversationActive &&
+      window.TTS &&
+      !speechSynthesis.speaking
+    ) {
+      TTS.speak("मैं आपसे और बात करना चाहती हूँ।");
+    }
+  }, 30000);
+}
+
+// 🔍 TTS समाप्ति पहचान
+function waitForSpeechEnd(callback) {
+  const check = setInterval(() => {
+    if (!speechSynthesis.speaking) {
+      clearInterval(check);
+      callback();
+    }
+  }, 120);
+}
+
+// 🔁 STT → Answer → फिर सुनना
+window.onAnjaliAnswered = function () {
+  if (!window.conversationActive) return;
+
+  const status = document.getElementById("appStatus");
+  status.textContent = "मैं सुन रही हूँ…";
+
+  setTimeout(() => {
+    if (window.STT && window.conversationActive) {
+      STT.start();
+    }
+  }, 500);
+};
+
+// ▶️ Buttons
+document.getElementById("startBtn").onclick = startConversation;
+document.getElementById("adminBtn").onclick = () => {
+  window.location.href = "admin.html";
+};
+</script>
 </body>
 </html>
