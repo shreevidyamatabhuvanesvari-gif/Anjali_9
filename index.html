@@ -182,80 +182,8 @@ document.getElementById("adminBtn").onclick = () => {
   window.location.href = "admin.html";
 };
 </script>
+<!-- ================= END ================= -->
 
-<!-- ================= SAFE CONVERSATION LOOP (FINAL) ================= -->
-<script>
-window.conversationActive = false;
-let audioUnlocked = false;
-let remindTimer = null;
-
-function startConversation() {
-  const status = document.getElementById("appStatus");
-
-  // 🔓 Audio unlock (एक बार)
-  if (window.TTS && !audioUnlocked) {
-    TTS.init();
-    audioUnlocked = true;
-  }
-
-  window.conversationActive = true;
-  status.textContent = "अंजली बोल रही है…";
-
-  // 🔊 अंजली बोले
-  if (window.TTS) {
-    TTS.speak("मैं सुन रही हूँ। आप मुझसे बात कर सकते हैं।");
-  }
-
-  // ⏳ बोलना खत्म होते ही सुनना
-  waitForSpeechEnd(() => {
-    if (window.STT && window.conversationActive) {
-      status.textContent = "मैं सुन रही हूँ…";
-      STT.start();
-    }
-  });
-
-  // 🔁 याद दिलाने वाला soft loop (30 सेकंड)
-  clearInterval(remindTimer);
-  remindTimer = setInterval(() => {
-    if (
-      window.conversationActive &&
-      window.TTS &&
-      !speechSynthesis.speaking
-    ) {
-      TTS.speak("मैं आपसे और बात करना चाहती हूँ।");
-    }
-  }, 30000);
-}
-
-// 🔍 TTS समाप्ति पहचान
-function waitForSpeechEnd(callback) {
-  const check = setInterval(() => {
-    if (!speechSynthesis.speaking) {
-      clearInterval(check);
-      callback();
-    }
-  }, 120);
-}
-
-// 🔁 STT → Answer → फिर सुनना
-window.onAnjaliAnswered = function () {
-  if (!window.conversationActive) return;
-
-  const status = document.getElementById("appStatus");
-  status.textContent = "मैं सुन रही हूँ…";
-
-  setTimeout(() => {
-    if (window.STT && window.conversationActive) {
-      STT.start();
-    }
-  }, 500);
-};
-
-// ▶️ Buttons
-document.getElementById("startBtn").onclick = startConversation;
-document.getElementById("adminBtn").onclick = () => {
-  window.location.href = "admin.html";
-};
-</script>
 </body>
 </html>
+
