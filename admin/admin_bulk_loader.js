@@ -144,40 +144,39 @@ Depends on: KnowledgeBase.js
     });
   };
 
-  // ---------- SAVE BULK ----------
-  document.getElementById("bulkSave").onclick = async () => {
-    const info = document.getElementById("bulkInfo");
-    const subject = document.getElementById("bulkSubject").value.trim();
-    const raw = document.getElementById("bulkInput").value.trim();
-    if (!subject || !raw) {
-      info.style.color = "#ff9f9f";
-      info.textContent = "विषय और प्रश्नोत्तर दोनों आवश्यक हैं।";
-      return;
-    }
-    const blocks = raw.split(/\n\s*\n/);
-    let saved = 0;
-    try {
-      await KnowledgeBase.init();
-      for (const b of blocks) {
-        const q = b.match(/Q:\s*(.+)/i);
-        const a = b.match(/A:\s*(.+)/i);
-        if (q && a) {
-          await KnowledgeBase.saveOne({
-            subject,
-            question: q[1].trim(),
-            answer: a[1].trim(),
-            tags: []
-          });
-          saved++;
-        }
+// ---------- SAVE BULK ----------
+document.getElementById("bulkSave").onclick = async () => {
+  const info = document.getElementById("bulkInfo");
+  const subject = document.getElementById("bulkSubject").value.trim();
+  const raw = document.getElementById("bulkInput").value.trim();
+  if (!subject || !raw) {
+    info.style.color = "#ff9f9f";
+    info.textContent = "विषय और प्रश्नोत्तर दोनों आवश्यक हैं।";
+    return;
+  }
+  const blocks = raw.split(/\n\s*\n/);
+  let saved = 0;
+  try {
+    await KnowledgeBase.init();
+    for (const b of blocks) {
+      const q = b.match(/Q:\s*(.+)/i);
+      const a = b.match(/A:\s*(.+)/i);
+      if (q && a) {
+        await KnowledgeBase.saveOne({
+          subject,
+          question: q[1].trim(),
+          answer: a[1].trim(),
+          tags: [] // tags पैरामीटर जोड़ें
+        });
+        saved++;
       }
-      info.style.color = "#9fdf9f";
-      info.textContent = `सफलतापूर्वक सेव किए गए प्रश्न: ${saved}`;
-      document.getElementById("bulkInput").value = "";
-    } catch (e) {
-      info.style.color = "#ff9f9f";
-      info.textContent = "Bulk सेव में त्रुटि हुई।";
-      console.error(e);
     }
-  };
-})();
+    info.style.color = "#9fdf9f";
+    info.textContent = `सफलतापूर्वक सेव किए गए प्रश्न: ${saved}`;
+    document.getElementById("bulkInput").value = "";
+  } catch (e) {
+    info.style.color = "#ff9f9f";
+    info.textContent = "Bulk सेव में त्रुटि हुई।";
+    console.error(e);
+  }
+};
