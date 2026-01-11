@@ -1,3 +1,4 @@
+// learning/KnowledgeBase.js
 (function (window) {
   "use strict";
   const DB_NAME = "AnjaliKnowledgeDB";
@@ -39,6 +40,7 @@
         return false;
       }
     },
+
     // ---------- SAVE SINGLE (FIXED) ----------
     async saveOne({ question, answer, tags = [] }) {
       if (!question || !answer) {
@@ -68,6 +70,7 @@
         }
       });
     },
+
     // ---------- GET ALL ----------
     async getAll() {
       let d;
